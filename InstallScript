@@ -1,0 +1,73 @@
+23:10 23/04/2020
+--------------------------------------------------
+--------------------------------------------------
+INSTALACIÓN   : NagiOS.
+SERVICIO      : Monitoreo de servicios.
+REQUERIMIENTOS: LAMP.
+--------------------------------------------------
+--------------------------------------------------
+SISTEMA OPERATIVO: LINUX.
+DISTRO GNU/LINUX : CentOS.
+VERSION          : 7.
+--------------------------------------------------
+--------------------------------------------------
+DIRECCION IP     : 192.168.1.74/24
+USUARIO          : root
+CLAVE            : Oscar567
+--------------------------------------------------
+--------------------------------------------------
+COMPAÑIA         : REDES EN SERVIDORES.
+INGENIERO        : OSCAR ANDRES MACIAS NARVAEZ.
+WHATSAPP         : +57 (315) 685 2745.
+PAÍS             : COLOMBIA.
+--------------------------------------------------
+--------------------------------------------------
+# PARA MODIFICAR EL ARCHIVO DE CONFIGURACIÓN DE FORMA PERMANENTE, SE DEBE REALIZAR LA SENTENCIA CON LA OPCIÓN "-i".
+sed -i '/SELINUX=enforcing/c SELINUX=disabled' /etc/sysconfig/selinux | cat | grep "/etc/sysconfig/selinux"
+# SE DEBE REINICIAR EL SISTEMA OPERATIVO PARA LEVANTAR EL CAMBIO CON EL SERVICIO "SELINUX".
+init 6
+
+yum install gd gd-devel gcc glibc glibc-common wget unzip zip make net-snmp net-snmp-utils net-snmp-perl bind-utils openssl-devel xinetd git curl libcurl-devel zip perl libpng-devel libjpeg-turbo-devel -y
+
+# MODIFICAR LOS PRIVILEGIOS DEL USUARIO "NAGIOS" EN EL GRUPO "NAGCMD".
+groupadd nagcmd; useradd nagios -g nagcmd; usermod -aG nagios,nagcmd apache
+
+cd /opt
+wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.3.4.tar.gz
+tar xzf nagios-4.3.4.tar.gz
+
+cd nagios-4.3.4
+./configure --with-command-group=nagcmd
+make all install install-init install-config install-commandmode install-webconf
+cp -R /opt/nagios-4.3.4/contrib/eventhandlers/ /usr/local/nagios/libexec/
+chown -R nagios:nagios /usr/local/nagios/libexec/eventhandlers
+/usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+
+# SE DEBE AGREGAR LA OPCIÓN “--permanent” PARA QUE EN CUANTO SE REINICIE EL SERVICIO NO DESCARTE EL CAMBIO.
+firewall-cmd --zone=public --permanent –add-port=80/tcp
+firewall-cmd --zone=public --permanent –add-port=443/tcp
+systemctl restart firewalld.service
+
+vi /usr/local/nagios/etc/objects/contacts.cfg
+email nagios@nksistemas.com ; <<***** CHANGE THIS TO YOUR EMAIL ADDRESS ******
+
+htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+
+chkconfig --add nagios && chkconfig --level 35 nagios on
+systemctl daemon-reload; systemctl start nagios.service; systemctl enable nagios.service; systemctl restart httpd.service
+
+* PRUEBAS. *
+http://192.168.1.74/nagios
+
+* CONFIGURACIONES. *
+
+# INSTALACIÓN DE PLUGINS.
+cd /opt
+wget https://nagios-plugins.org/download/nagios-plugins-2.2.1.tar.gz
+tar xzf nagios-plugins-2.2.1.tar.gz
+cd nagios-plugins-2.2.1
+./configure --with-nagios-user=nagios --with-nagios-group=nagios --with-openssl
+make install
+
+--------------------------------------------------
+--------------------------------------------------
