@@ -1,0 +1,33 @@
+22:32 22/04/2020
+--------------------------------------------------
+--------------------------------------------------
+INSTALACION: Apache.
+SERVICIO   : WEB.
+--------------------------------------------------
+--------------------------------------------------
+SISTEMA OPERATIVO: LINUX.
+DISTRO GNU/LINUX : CentOS.
+VERSION          : 7.
+--------------------------------------------------
+--------------------------------------------------
+DIRECCION IP     : 192.168.1.74/24
+USUARIO          : root
+CLAVE            : Oscar567
+--------------------------------------------------
+--------------------------------------------------
+COMPAÑIA         : REDES EN SERVIDORES, COLOMBIA. 
+INGENIERO        : OSCAR ANDRES MACIAS NARVAEZ.
+--------------------------------------------------
+--------------------------------------------------
+yum install httpd -y
+
+systemctl start httpd.service; systemctl enable httpd.service
+
+# AGREGAR EXCEPCION DEL SERVICIO HTTP DENTRO DEL FIREWALL.
+firewall-cmd --permanent --add-service=http; systemctl restart firewalld
+
+* PRUEBAS. *
+http://192.168.1.72/
+
+--------------------------------------------------
+--------------------------------------------------
